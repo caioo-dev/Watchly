@@ -7,7 +7,7 @@ namespace Watchly.Domain.Entities
         public Guid Id { get; private set; } = Guid.NewGuid();
         public TipoTitulo Tipo { get; private set; }
         public string Nome { get; private set; } = default!;
-        public int Ano { get; private set; }
+        public int? Ano { get; private set; }
 
         public Titulos()
         {

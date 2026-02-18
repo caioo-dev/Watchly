@@ -18,7 +18,7 @@ namespace Watchly.Infrastructure
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Nome).IsRequired();
                 entity.Property(e => e.Tipo).IsRequired();
-                entity.Property(e => e.Ano).IsRequired(false);
+                entity.Property(e => e.Ano);
             });
 
             modelBuilder.Entity<UsuarioTitulo>(entity =>
@@ -32,7 +32,7 @@ namespace Watchly.Infrastructure
                 entity.Property(e => e.AtualizadoEm).IsRequired();
                 entity.Property(e => e.TemporadaAtual);
                 entity.Property(e => e.EpisodioAtual);
-                // Configura o relacionamento com Titulos
+
                 entity.HasOne<Titulos>()
                     .WithMany()
                     .HasForeignKey(ut => ut.TituloId)
