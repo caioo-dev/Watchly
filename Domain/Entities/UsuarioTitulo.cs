@@ -4,15 +4,17 @@ namespace Watchly.Domain.Entities
 {
     public class UsuarioTitulo
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; private set; } = Guid.NewGuid();
         public Guid UsuarioId { get; private set; }
         public Guid TituloId { get; private set; }
         public StatusTitulo Status { get; private set; } = StatusTitulo.ParaAssistir;
         public DateTime DataAdicionado { get; private set; }
-        public int Rating { get; private set; }
+        public int Nota { get; private set; }
         public DateTime AtualizadoEm { get; private set; } = DateTime.UtcNow;
         public int TemporadaAtual { get; private set; }
         public int EpisodioAtual { get; private set; }
+        public Titulo Titulo { get; private set; } = default!;
+
 
         public UsuarioTitulo()
         {
@@ -21,13 +23,14 @@ namespace Watchly.Domain.Entities
 
         public UsuarioTitulo(Guid id, Guid usuarioId, Guid tituloId)
         {
-            if (id == Guid.Empty) throw new ArgumentException("Id não pode ser vazio.", nameof(id));
             if (usuarioId == Guid.Empty) throw new ArgumentException("UsuarioId não pode ser vazio.", nameof(usuarioId));
             if (tituloId == Guid.Empty) throw new ArgumentException("TituloId não pode ser vazio.", nameof(tituloId));
 
-            Id = id;
             UsuarioId = usuarioId;
             TituloId = tituloId;
+            TituloId = tituloId;
+            DataAdicionado = DateTime.UtcNow;
+            AtualizadoEm = DateTime.UtcNow;
         }
 
         public void AvaliarTitulo(int rating)
@@ -37,7 +40,7 @@ namespace Watchly.Domain.Entities
                 throw new ArgumentOutOfRangeException(nameof(rating), "Avaliação deve ser entre 1 e 10.");
             }
 
-            Rating = rating;
+            Nota = rating;
             AtualizadoEmData();
         }
 

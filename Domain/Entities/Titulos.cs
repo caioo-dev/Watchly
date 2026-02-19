@@ -2,19 +2,19 @@
 
 namespace Watchly.Domain.Entities
 {
-    public class Titulos
+    public class Titulo
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         public TipoTitulo Tipo { get; private set; }
         public string Nome { get; private set; } = default!;
         public int? Ano { get; private set; }
 
-        public Titulos()
+        public Titulo()
         {
             
         }
 
-        public Titulos(TipoTitulo tipo, string nome, int? ano = null)
+        public Titulo(TipoTitulo tipo, string nome, int? ano = null)
         {
             SetTipo(tipo);
             SetNome(nome);
