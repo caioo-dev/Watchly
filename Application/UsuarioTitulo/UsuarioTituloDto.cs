@@ -2,7 +2,15 @@
 
 namespace Watchly.Application.UsuarioTitulo
 {
-    public sealed record AddToListRequest(Guid TituloId, StatusTitulo Status);
+    public sealed record AddToListRequest(
+        string ExternalId,
+        FonteTitulo Fonte,
+        TipoTitulo Tipo,
+        string Nome,
+        int? Ano,
+        string? ImagemUrl,
+        StatusTitulo Status
+    );
     public sealed record UpdateTrackingRequest(
         StatusTitulo? Status,
         int? Nota,

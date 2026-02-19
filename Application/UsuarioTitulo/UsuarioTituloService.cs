@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Watchly.Domain.Entities;
 using Watchly.Domain.Enum;
 using Watchly.Infrastructure;
 
@@ -53,17 +54,24 @@ namespace Watchly.Application.UsuarioTitulo
         {
             var usuarioId = GetUsuarioId();
 
-            var tituloExiste = await _db.Titulos.AnyAsync(t => t.Id == request.TituloId, ct);
-            if (!tituloExiste)
-                throw new KeyNotFoundException("Título não encontrado.");
+            // Upsert do título
+            var titulo = await _db.Titulos
+                .FirstOrDefaultAsync(t => t.ExternalId == request.ExternalId && t.Fonte == request.Fonte, ct);
+
+            if (titulo is null)
+            {
+                titulo = new Titulo(request.ExternalId, request.Fonte, request.Tipo, request.Nome, request.Ano, request.ImagemUrl);
+                await _db.Titulos.AddAsync(titulo, ct);
+                await _db.SaveChangesAsync(ct);
+            }
 
             var jaAdicionado = await _db.UsuarioTitulos.AnyAsync(
-                ut => ut.UsuarioId == usuarioId && ut.TituloId == request.TituloId, ct);
+                ut => ut.UsuarioId == usuarioId && ut.TituloId == titulo.Id, ct);
 
             if (jaAdicionado)
                 throw new InvalidOperationException("Título já está na lista do usuário.");
 
-            var entry = new Domain.Entities.UsuarioTitulo(Guid.NewGuid(), usuarioId, request.TituloId);
+            var entry = new Domain.Entities.UsuarioTitulo(Guid.NewGuid(), usuarioId, titulo.Id);
             entry.AtualizarStatus(request.Status);
 
             await _db.UsuarioTitulos.AddAsync(entry, ct);

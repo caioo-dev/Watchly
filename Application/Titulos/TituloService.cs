@@ -1,43 +1,35 @@
-﻿using Watchly.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using Watchly.Domain.Enum;
-using Watchly.Infrastructure;
+﻿using Watchly.Domain.Enum;
+using Watchly.Infrastructure.ExternalApis;
 
 namespace Watchly.Application.Titulos
 {
     public sealed class TituloService : ITitulosService
     {
-        private readonly AppDbContext _db;
+        private readonly TmdbClient _tmdb;
+        private readonly JikanClient _jikan;
 
-        public TituloService(AppDbContext db) => _db = db;
-
-        public async Task<TituloResponse> CriarAsync(CreateTituloRequest request, CancellationToken ct)
+        public TituloService(TmdbClient tmdb, JikanClient jikan)
         {
-            var titulo = new Titulo(request.Tipo, request.Nome, request.Ano);
-
-            _db.Titulos.Add(titulo);
-            await _db.SaveChangesAsync(ct);
-
-            return new TituloResponse(titulo.Id, titulo.Tipo, titulo.Nome, titulo.Ano);
+            _tmdb = tmdb;
+            _jikan = jikan;
         }
 
-        public async Task<IReadOnlyList<TituloResponse>> BuscarAsync(string? query, TipoTitulo? tipo, CancellationToken ct)
+        public async Task<IReadOnlyList<TituloExternoResponse>> BuscarAsync(
+            string query, TipoTitulo? tipo, CancellationToken ct)
         {
-            var q = _db.Titulos.AsNoTracking().AsQueryable();
+            var tasks = new List<Task<IReadOnlyList<TituloExternoResponse>>>();
 
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                var term = query.Trim();
-                q = q.Where(x => x.Nome.Contains(term));
-            }
+            // TMDB cuida de Filme e Serie
+            if (tipo is null || tipo == TipoTitulo.Filme || tipo == TipoTitulo.Serie)
+                tasks.Add(_tmdb.SearchAsync(query, tipo, ct));
 
-            if (tipo is not null)
-                q = q.Where(x => x.Tipo == tipo);
+            // Jikan cuida de Anime
+            if (tipo is null || tipo == TipoTitulo.Anime)
+                tasks.Add(_jikan.SearchAsync(query, ct));
 
-            return await q
-                .OrderBy(x => x.Nome)
-                .Select(x => new TituloResponse(x.Id, x.Tipo, x.Nome, x.Ano))
-                .ToListAsync(ct);
+            var resultados = await Task.WhenAll(tasks);
+
+            return resultados.SelectMany(r => r).ToList().AsReadOnly();
         }
     }
 }

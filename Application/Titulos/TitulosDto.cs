@@ -2,6 +2,12 @@
 
 namespace Watchly.Application.Titulos
 {
-    public sealed record CreateTituloRequest(TipoTitulo Tipo, string Nome, int? Ano);
-    public sealed record TituloResponse(Guid Id, TipoTitulo Tipo, string Nome, int? Ano);
+    public sealed record TituloExternoResponse(
+        string ExternalId,
+        FonteTitulo Fonte,
+        TipoTitulo Tipo,
+        string Nome,
+        int? Ano,
+        string? ImagemUrl
+    );
 }
