@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Watchly.Application.Auth;
 
 namespace Watchly.API.Controllers
@@ -33,6 +34,28 @@ namespace Watchly.API.Controllers
             CancellationToken ct)
         {
             var result = await _service.LoginAsync(request, ct);
+            return Ok(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMe(CancellationToken ct)
+        {
+            var result = await _service.GetMeAsync(ct);
+            return Ok(result);
+        }
+
+        [HttpPut("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> UpdateProfile(
+            [FromBody] UpdateProfileRequest request,
+            CancellationToken ct)
+        {
+            var result = await _service.UpdateProfileAsync(request, ct);
             return Ok(result);
         }
     }

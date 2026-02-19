@@ -20,5 +20,18 @@
             Email = email.Trim().ToLowerInvariant();
             SenhaHash = senhaHash;
         }
+        public void AtualizarEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email não pode ser vazio.", nameof(email));
+            Email = email;
+        }
+
+        public void AtualizarSenha(string senhaHash)
+        {
+            if (string.IsNullOrWhiteSpace(senhaHash))
+                throw new ArgumentException("Senha não pode ser vazia.", nameof(senhaHash));
+            SenhaHash = senhaHash;
+        }
     }
 }

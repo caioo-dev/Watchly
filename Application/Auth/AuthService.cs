@@ -13,11 +13,13 @@ namespace Watchly.Application.Auth
     {
         private readonly AppDbContext _db;
         private readonly IConfiguration _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(AppDbContext db, IConfiguration config)
         {
             _db = db;
             _config = config;
+            _httpContextAccessor = new HttpContextAccessor(
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct)
@@ -70,6 +72,60 @@ namespace Watchly.Application.Auth
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        private Guid GetUsuarioId()
+        {
+            var claim = _httpContextAccessor.HttpContext?.User
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(claim) || !Guid.TryParse(claim, out var userId))
+                throw new UnauthorizedAccessException("Usuário não autenticado.");
+
+            return userId;
+        }
+
+        public async Task<MeResponse> GetMeAsync(CancellationToken ct)
+        {
+            var usuarioId = GetUsuarioId();
+
+            var usuario = await _db.Usuarios.FindAsync([usuarioId], ct)
+                ?? throw new KeyNotFoundException("Usuário não encontrado.");
+
+            return new MeResponse(usuario.Id, usuario.Email, usuario.CriadoEm);
+        }
+
+        public async Task<MeResponse> UpdateProfileAsync(UpdateProfileRequest request, CancellationToken ct)
+        {
+            var usuarioId = GetUsuarioId();
+
+            var usuario = await _db.Usuarios.FindAsync([usuarioId], ct)
+                ?? throw new KeyNotFoundException("Usuário não encontrado.");
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                var emailNormalizado = request.Email.Trim().ToLowerInvariant();
+                var emailEmUso = await _db.Usuarios
+                    .AnyAsync(u => u.Email == emailNormalizado && u.Id != usuarioId, ct);
+
+                if (emailEmUso)
+                    throw new InvalidOperationException("E-mail já está em uso.");
+
+                usuario.AtualizarEmail(emailNormalizado);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.NovaSenha))
+            {
+                if (string.IsNullOrWhiteSpace(request.SenhaAtual))
+                    throw new ArgumentException("Senha atual é obrigatória para alterar a senha.");
+
+                if (!BCrypt.Net.BCrypt.Verify(request.SenhaAtual, usuario.SenhaHash))
+                    throw new UnauthorizedAccessException("Senha atual incorreta.");
+
+                usuario.AtualizarSenha(BCrypt.Net.BCrypt.HashPassword(request.NovaSenha));
+            }
+
+            await _db.SaveChangesAsync(ct);
+            return new MeResponse(usuario.Id, usuario.Email, usuario.CriadoEm);
         }
     }
 }
