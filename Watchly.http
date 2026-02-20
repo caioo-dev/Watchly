@@ -1,6 +1,0 @@
-@Watchly_HostAddress = http://localhost:5014
-
-GET {{Watchly_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
