@@ -27,6 +27,7 @@ namespace Watchly.Application.UsuarioTitulo
         int? Nota,
         int? TemporadaAtual,
         int? EpisodioAtual,
+        string? ImagemUrl,
         DateTime UpdatedAt
     );
 }

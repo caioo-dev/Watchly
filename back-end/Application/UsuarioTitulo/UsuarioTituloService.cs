@@ -143,6 +143,7 @@ namespace Watchly.Application.UsuarioTitulo
                 ut.Nota,
                 ut.TemporadaAtual == 0 ? null : ut.TemporadaAtual,
                 ut.EpisodioAtual == 0 ? null : ut.EpisodioAtual,
+                ut.Titulo.ImagemUrl,
                 ut.AtualizadoEm
             );
     }

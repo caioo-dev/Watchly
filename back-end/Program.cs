@@ -57,6 +57,16 @@ namespace Watchly
 
                 builder.Services.AddHttpClient<JikanClient>();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Dev", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
 
             // Add services to the container.
 
@@ -73,12 +83,13 @@ namespace Watchly
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("Dev");
+
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
