@@ -1,0 +1,22 @@
+<nav class="bg-gray-900 border-b border-gray-800 px-4 py-3">
+  <div class="max-w-6xl mx-auto flex items-center justify-between">
+
+    <a routerLink="/busca" class="text-xl font-bold text-white tracking-tight">
+      Watchly
+    </a>
+
+    <div class="flex items-center gap-2">
+      <a routerLink="/busca" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Buscar</a>
+
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/minha-lista" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Minha Lista</a>
+        <a routerLink="/perfil" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Perfil</a>
+        <button (click)="authService.logout()" class="text-gray-400 hover:text-red-400 px-3 py-2 rounded-lg transition-colors text-sm font-medium">Sair</button>
+      } @else {
+        <a routerLink="/login" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Entrar</a>
+        <a routerLink="/register" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">Cadastrar</a>
+      }
+    </div>
+
+  </div>
+</nav>

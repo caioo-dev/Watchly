@@ -1,0 +1,61 @@
+<div>
+  @if (carregando) {
+    <div class="text-center text-gray-400 py-12">Carregando...</div>
+  }
+
+  @if (erro) {
+    <div class="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
+      <p class="text-red-400 text-sm">{{ erro }}</p>
+    </div>
+  }
+
+  @if (titulo) {
+    <div class="flex flex-col md:flex-row gap-8">
+
+      <div class="w-full md:w-64 shrink-0">
+        @if (titulo.imagemUrl) {
+          <img [src]="titulo.imagemUrl" [alt]="titulo.nome" class="w-full rounded-xl object-cover" />
+        } @else {
+          <div class="w-full aspect-[2/3] bg-gray-800 rounded-xl flex items-center justify-center">
+            <span class="text-gray-500">Sem imagem</span>
+          </div>
+        }
+      </div>
+
+      <div class="flex-1 space-y-4">
+        <div>
+          <h1 class="text-3xl font-bold text-white">{{ titulo.nome }}</h1>
+          <p class="text-gray-400 mt-1">{{ titulo.tipo }} {{ titulo.ano ? '· ' + titulo.ano : '' }}</p>
+        </div>
+
+        @if (titulo.sinopse) {
+          <p class="text-gray-300 leading-relaxed">{{ titulo.sinopse }}</p>
+        }
+
+        @if (mensagem) {
+          <div class="bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-4 py-3">
+            <p class="text-indigo-400 text-sm">{{ mensagem }}</p>
+          </div>
+        }
+
+        @if (authService.isAuthenticated() && !adicionado) {
+          <div class="space-y-2">
+            <p class="text-gray-400 text-sm">Adicionar à minha lista como:</p>
+            <div class="flex flex-wrap gap-2">
+              <button (click)="adicionarNaLista('ParaAssistir')" [disabled]="adicionando" class="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm transition-colors">Para Assistir</button>
+              <button (click)="adicionarNaLista('Assistindo')" [disabled]="adicionando" class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm transition-colors">Assistindo</button>
+              <button (click)="adicionarNaLista('Concluido')" [disabled]="adicionando" class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm transition-colors">Concluído</button>
+              <button (click)="adicionarNaLista('Abandonado')" [disabled]="adicionando" class="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm transition-colors">Abandonado</button>
+            </div>
+          </div>
+        } @else if (!authService.isAuthenticated()) {
+          <div class="flex items-center gap-3">
+            <p class="text-gray-400 text-sm">Faça login para adicionar à sua lista</p>
+            <a routerLink="/login" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">Entrar</a>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+</div>

@@ -1,0 +1,62 @@
+<div class="space-y-6">
+
+  <div class="flex gap-3">
+    <input
+      [(ngModel)]="query"
+      (keyup.enter)="buscar()"
+      type="text"
+      placeholder="Buscar filmes, séries, animes..."
+      class="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-600"
+    />
+    <select
+      [(ngModel)]="tipoFiltro"
+      class="bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
+    >
+      <option value="">Todos</option>
+      <option value="Filme">Filmes</option>
+      <option value="Serie">Séries</option>
+      <option value="Anime">Animes</option>
+    </select>
+    <button
+      (click)="buscar()"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+    >
+      Buscar
+    </button>
+  </div>
+
+  @if (carregando) {
+    <div class="text-center text-gray-400 py-12">Buscando...</div>
+  }
+
+  @if (erro) {
+    <div class="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
+      <p class="text-red-400 text-sm">{{ erro }}</p>
+    </div>
+  }
+
+  @if (!carregando && buscou && resultados.length === 0) {
+    <div class="text-center text-gray-400 py-12">Nenhum resultado encontrado.</div>
+  }
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    @for (titulo of resultados; track titulo.externalId) {
+      <a routerLink="/titulo/{{ titulo.fonte }}/{{ titulo.externalId }}" class="group cursor-pointer">
+        <div class="bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all">
+          @if (titulo.imagemUrl) {
+            <img [src]="titulo.imagemUrl" [alt]="titulo.nome" class="w-full aspect-[2/3] object-cover" />
+          } @else {
+            <div class="w-full aspect-[2/3] bg-gray-700 flex items-center justify-center">
+              <span class="text-gray-500 text-sm">Sem imagem</span>
+            </div>
+          }
+          <div class="p-3">
+            <p class="text-white text-sm font-medium truncate">{{ titulo.nome }}</p>
+            <p class="text-gray-400 text-xs mt-1">{{ titulo.tipo }} {{ titulo.ano ? '· ' + titulo.ano : '' }}</p>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+
+</div>

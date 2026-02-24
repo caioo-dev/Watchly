@@ -1,0 +1,44 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  @for (item of lista; track item.tituloId) {
+    <div class="bg-gray-800 rounded-xl overflow-hidden">
+
+      @if (item.imagemUrl) {
+        <img [src]="item.imagemUrl" [alt]="item.nome" class="w-full aspect-[2/3] object-cover" />
+      } @else {
+        <div class="w-full aspect-[2/3] bg-gray-700 flex items-center justify-center">
+          <span class="text-gray-500 text-sm">Sem imagem</span>
+        </div>
+      }
+
+      <div class="p-4 space-y-3">
+        <div>
+          <p class="text-white font-medium truncate">{{ item.nome }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ item.tipo }}</p>
+        </div>
+
+        <select
+          [value]="item.status"
+          (change)="atualizarStatus(item.tituloId, $any($event.target).value)"
+          class="w-full bg-gray-700 text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="ParaAssistir">Para Assistir</option>
+          <option value="Assistindo">Assistindo</option>
+          <option value="Concluido">Concluído</option>
+          <option value="Abandonado">Abandonado</option>
+        </select>
+
+        @if (item.nota) {
+          <p class="text-yellow-400 text-sm">Nota: {{ item.nota }}/10</p>
+        }
+
+        <button
+          (click)="remover(item.tituloId)"
+          class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg py-2 text-sm transition-colors"
+        >
+          Remover
+        </button>
+      </div>
+
+    </div>
+  }
+</div>
