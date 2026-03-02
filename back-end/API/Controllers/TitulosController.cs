@@ -21,14 +21,15 @@ namespace Watchly.API.Controllers
         public async Task<IActionResult> Buscar(
             [FromQuery] string query,
             [FromQuery] TipoTitulo? tipo,
-            CancellationToken ct)
+            [FromQuery] int page = 1,
+            CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return BadRequest("O parâmetro 'query' é obrigatório.");
 
             try
             {
-                var result = await _service.BuscarAsync(query, tipo, ct);
+                var result = await _service.BuscarAsync(query, tipo, page, ct);
                 return Ok(result);
             }
             catch (Exception ex)

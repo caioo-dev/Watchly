@@ -1,5 +1,5 @@
 export type TipoTitulo = 'Filme' | 'Serie' | 'Anime';
-export type FonteTitulo = 'TMDB' | 'Jikan';
+export type FonteTitulo = 'TMDB';
 export type StatusTitulo = 'ParaAssistir' | 'Assistindo' | 'Concluido' | 'Abandonado';
 
 export interface TituloExternoResponse {

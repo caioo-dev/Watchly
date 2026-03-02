@@ -9,7 +9,7 @@ import { StatusTitulo } from '../../core/models/titulo.model';
 @Component({
   selector: 'app-minha-lista',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './minha-lista.html'
 })
 export class MinhaListaComponent implements OnInit {

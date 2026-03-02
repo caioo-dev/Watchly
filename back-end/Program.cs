@@ -55,8 +55,6 @@ namespace Watchly
                     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {key}");
                 });
 
-                builder.Services.AddHttpClient<JikanClient>();
-
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("Dev", policy =>

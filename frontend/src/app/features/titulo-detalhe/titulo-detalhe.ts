@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TituloService } from '../../core/services/titulo.service';
 import { MinhaListaService } from '../../core/services/minha-lista.service';
 import { AuthService } from '../../core/services/auth.service';
+import { Location } from '@angular/common';
 import { TituloDetalheResponse, FonteTitulo, StatusTitulo, TipoTitulo } from '../../core/models/titulo.model';
 
 @Component({
@@ -13,6 +14,7 @@ import { TituloDetalheResponse, FonteTitulo, StatusTitulo, TipoTitulo } from '..
 })
 export class TituloDetalheComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly tituloService = inject(TituloService);
   private readonly minhaListaService = inject(MinhaListaService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -24,6 +26,11 @@ export class TituloDetalheComponent implements OnInit {
   adicionando = false;
   adicionado = false;
   mensagem = '';
+
+  voltar(): void {
+    this.tituloService.voltandoDaBusca = true;
+    this.location.back();
+  }
 
   ngOnInit(): void {
     const fonte = this.route.snapshot.paramMap.get('fonte') as FonteTitulo;

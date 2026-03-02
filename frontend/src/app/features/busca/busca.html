@@ -23,6 +23,14 @@
     >
       Buscar
     </button>
+    @if (buscou) {
+    <button
+      (click)="limpar()"
+      class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-3 rounded-lg transition-colors font-medium"
+    >
+      Limpar
+    </button>
+  }
   </div>
 
   @if (carregando) {
@@ -59,4 +67,22 @@
     }
   </div>
 
+  @if (temMais || pagina > 1) {
+    <div class="flex justify-center gap-4 mt-6">
+      <button
+        (click)="anterior()"
+        [disabled]="pagina === 1"
+        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Anterior
+      </button>
+      <button
+        (click)="proxima()"
+        [disabled]="!temMais"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Próxima
+      </button>
+    </div>
+  }
 </div>

@@ -1,4 +1,12 @@
 <div>
+  <button
+    (click)="voltar()"
+    class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 text-sm"
+  >
+    ← Voltar
+  </button>
+  
+<div>
   @if (carregando) {
     <div class="text-center text-gray-400 py-12">Carregando...</div>
   }
