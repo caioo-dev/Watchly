@@ -35,12 +35,11 @@ namespace Watchly.Application.Titulos
         }
 
         public async Task<TituloDetalheResponse> BuscarDetalheAsync(
-            string externalId, FonteTitulo fonte, CancellationToken ct)
+            FonteTitulo fonte, TipoTitulo tipo, string externalId, CancellationToken ct)
         {
             TituloDetalheResponse? detalhe = fonte switch
             {
-                FonteTitulo.TMDB => await _tmdb.GetDetalheAsync(externalId, TipoTitulo.Filme, ct)
-                                  ?? await _tmdb.GetDetalheAsync(externalId, TipoTitulo.Serie, ct),
+                FonteTitulo.TMDB => await _tmdb.GetDetalheAsync(externalId, tipo, ct),
                 FonteTitulo.Jikan => await _jikan.GetDetalheAsync(externalId, ct),
                 _ => throw new ArgumentException("Fonte inválida.")
             };

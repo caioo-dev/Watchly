@@ -37,15 +37,16 @@ namespace Watchly.API.Controllers
             }
         }
 
-        [HttpGet("{fonte}/{externalId}")]
+        [HttpGet("{fonte}/{tipo}/{externalId}")]
         [ProducesResponseType(typeof(TituloDetalheResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BuscarDetalhe(
             [FromRoute] FonteTitulo fonte,
             [FromRoute] string externalId,
+            [FromRoute] TipoTitulo tipo,
             CancellationToken ct)
         {
-            var result = await _service.BuscarDetalheAsync(externalId, fonte, ct);
+            var result = await _service.BuscarDetalheAsync(fonte, tipo, externalId, ct);
             return Ok(result);
         }
     }
