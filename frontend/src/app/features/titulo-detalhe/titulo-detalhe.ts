@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TituloService } from '../../core/services/titulo.service';
 import { MinhaListaService } from '../../core/services/minha-lista.service';
 import { AuthService } from '../../core/services/auth.service';
-import { TituloDetalheResponse, FonteTitulo, StatusTitulo } from '../../core/models/titulo.model';
+import { TituloDetalheResponse, FonteTitulo, StatusTitulo, TipoTitulo } from '../../core/models/titulo.model';
 
 @Component({
   selector: 'app-titulo-detalhe',
@@ -28,8 +28,13 @@ export class TituloDetalheComponent implements OnInit {
   ngOnInit(): void {
     const fonte = this.route.snapshot.paramMap.get('fonte') as FonteTitulo;
     const externalId = this.route.snapshot.paramMap.get('externalId')!;
+    const tipo = this.route.snapshot.paramMap.get('tipo') as TipoTitulo;
 
-    this.tituloService.buscarDetalhe(fonte, externalId).subscribe({
+    console.log('fonte:', fonte);
+    console.log('tipo:', tipo);
+    console.log('externalId:', externalId);
+
+    this.tituloService.buscarDetalhe(fonte, tipo, externalId).subscribe({
       next: (data) => {
         this.titulo = data;
         this.carregando = false;

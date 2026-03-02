@@ -41,7 +41,7 @@
 
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
     @for (titulo of resultados; track titulo.externalId) {
-      <a routerLink="/titulo/{{ titulo.fonte }}/{{ titulo.externalId }}" class="group cursor-pointer">
+     <a [routerLink]="['/titulo', titulo.fonte, titulo.tipo, titulo.externalId]" class="group cursor-pointer">
         <div class="bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all">
           @if (titulo.imagemUrl) {
             <img [src]="titulo.imagemUrl" [alt]="titulo.nome" class="w-full aspect-[2/3] object-cover" />

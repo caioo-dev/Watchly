@@ -33,7 +33,7 @@ export const routes: Routes = [
   },
     */
   {
-    path: 'titulo/:fonte/:externalId',
+    path: 'titulo/:fonte/:tipo/:externalId',
     loadComponent: () => import('./features/titulo-detalhe/titulo-detalhe').then(m => m.TituloDetalheComponent)
   },
 

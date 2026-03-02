@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,7 +9,9 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
 })
+
 export class LoginComponent {
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -31,8 +33,9 @@ export class LoginComponent {
     this.authService.login(this.form.value as any).subscribe({
       next: () => this.router.navigate(['/busca']),
       error: (err) => {
-        this.erro = err.error?.message ?? 'Erro ao fazer login.';
+        this.erro = err.error?.message ?? 'E-mail ou senha inválidos.';
         this.carregando = false;
+        this.cdr.detectChanges();
       }
     });
   }

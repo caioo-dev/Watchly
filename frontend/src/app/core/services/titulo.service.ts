@@ -15,7 +15,7 @@ export class TituloService {
     return this.http.get<TituloExternoResponse[]>(`${environment.apiUrl}/titulos`, { params });
   }
 
-  buscarDetalhe(fonte: FonteTitulo, externalId: string): Observable<TituloDetalheResponse> {
-    return this.http.get<TituloDetalheResponse>(`${environment.apiUrl}/titulos/${fonte}/${externalId}`);
+  buscarDetalhe(fonte: FonteTitulo, tipo: TipoTitulo, externalId: string): Observable<TituloDetalheResponse> {
+    return this.http.get<TituloDetalheResponse>(`${environment.apiUrl}/titulos/${fonte}/${tipo}/${externalId}`);
   }
 }
