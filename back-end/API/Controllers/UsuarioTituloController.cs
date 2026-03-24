@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Watchly.Application.UsuarioTitulo;
 using Watchly.Domain.Enum;
@@ -30,6 +31,8 @@ namespace Watchly.API.Controllers
         }
 
         [HttpGet]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = true)]
         [ProducesResponseType(typeof(IReadOnlyList<UserTituloResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMyList(
             [FromQuery] StatusTitulo? status,

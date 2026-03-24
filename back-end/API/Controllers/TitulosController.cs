@@ -18,6 +18,7 @@ namespace Watchly.API.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> Buscar(
             [FromQuery] string query,
             [FromQuery] TipoTitulo? tipo,
@@ -39,6 +40,7 @@ namespace Watchly.API.Controllers
         }
 
         [HttpGet("{fonte}/{tipo}/{externalId}")]
+        [ResponseCache(Duration = 60)]
         [ProducesResponseType(typeof(TituloDetalheResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> BuscarDetalhe(

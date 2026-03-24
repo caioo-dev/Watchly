@@ -65,7 +65,6 @@ namespace Watchly.Infrastructure.ExternalApis
             return doc.RootElement
                 .GetProperty("results")
                 .EnumerateArray()
-                .Take(10)
                 .Select(item => ParsearItem(item, tipoBase))
                 .ToList();
         }

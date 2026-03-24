@@ -1,3 +1,4 @@
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -65,6 +66,19 @@ namespace Watchly
                 });
             });
 
+            builder.Services.AddHttpCacheHeaders(
+                expirationModelOptionsAction: options =>
+                {
+                    options.MaxAge = 60;
+                    options.CacheLocation = CacheLocation.Public;
+                },
+                validationModelOptionsAction: options =>
+                {
+                    options.MustRevalidate = true;
+                }
+                );
+
+            builder.Services.AddResponseCompression();
 
             // Add services to the container.
 
@@ -81,7 +95,11 @@ namespace Watchly
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("Dev");
+            app.UseCors(policyName: "Dev");
+
+            app.UseResponseCompression();
+
+            app.UseHttpCacheHeaders();
 
             app.UseMiddleware<ExceptionMiddleware>();
 
