@@ -37,10 +37,6 @@ export class TituloDetalheComponent implements OnInit {
     const externalId = this.route.snapshot.paramMap.get('externalId')!;
     const tipo = this.route.snapshot.paramMap.get('tipo') as TipoTitulo;
 
-    console.log('fonte:', fonte);
-    console.log('tipo:', tipo);
-    console.log('externalId:', externalId);
-
     this.tituloService.buscarDetalhe(fonte, tipo, externalId).subscribe({
       next: (data) => {
         this.titulo = data;
