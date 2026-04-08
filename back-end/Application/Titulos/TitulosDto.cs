@@ -8,7 +8,8 @@ namespace Watchly.Application.Titulos
         TipoTitulo Tipo,
         string Nome,
         int? Ano,
-        string? ImagemUrl
+        string? ImagemUrl,
+        double ? Popularidade
     );
     public sealed record TituloDetalheResponse(
         string ExternalId,

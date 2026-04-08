@@ -19,7 +19,10 @@ namespace Watchly.Infrastructure.ExternalApis
             string query, TipoTitulo? tipo, int page, CancellationToken ct)
         {
             var resultados = await BuscarResultadosAsync(query, tipo, page, ct);
-            return FiltrarPorTipo(resultados, tipo);
+            return FiltrarPorTipo(resultados, tipo)
+                .OrderByDescending(t => t.Popularidade)
+                .ToList()
+                .AsReadOnly();
         }
 
         public async Task<TituloDetalheResponse?> GetDetalheAsync(
@@ -93,8 +96,9 @@ namespace Watchly.Infrastructure.ExternalApis
             var ano = ExtrairAno(item);
             var poster = ExtrairPoster(item);
             var tipo = ClassificarTipo(item, tipoBase);
+            double popularidade = ExtrairPopularidade(item);
 
-            return new TituloExternoResponse(id, FonteTitulo.TMDB, tipo, nome, ano, poster);
+            return new TituloExternoResponse(id, FonteTitulo.TMDB, tipo, nome, ano, poster, popularidade);
         }
 
         private static TituloDetalheResponse ParsearDetalhe(
@@ -103,8 +107,8 @@ namespace Watchly.Infrastructure.ExternalApis
             var nome = ExtrairNome(item);
             var ano = ExtrairAno(item);
             var poster = ExtrairPoster(item);
-            var sinopse = item.TryGetProperty("overview", out var o) ? o.GetString() : null;
-            var popul = item.TryGetProperty("popularity", out var p) ? p.GetDouble() : (double?)null;
+            var sinopse = ExtrairSinopse(item);
+            var popul = ExtrairPopularidade(item);
 
             return new TituloDetalheResponse(externalId, FonteTitulo.TMDB, tipo, nome, ano, poster, sinopse, popul);
         }
@@ -133,6 +137,9 @@ namespace Watchly.Infrastructure.ExternalApis
             return "Sem título";
         }
 
+        private static string ExtrairSinopse(JsonElement item) =>
+            item.TryGetProperty("overview", out var o) ? o.GetString() ?? "Sem sinopse" : "Sem sinopse";
+
         private static int? ExtrairAno(JsonElement item)
         {
             var data = item.TryGetProperty("release_date", out var rd) ? rd.GetString()
@@ -141,6 +148,9 @@ namespace Watchly.Infrastructure.ExternalApis
 
             return data is { Length: >= 4 } && int.TryParse(data[..4], out var ano) ? ano : null;
         }
+
+        private static double ExtrairPopularidade(JsonElement item) =>
+            item.TryGetProperty("popularity", out var p) ? p.GetDouble() : 0.0;
 
         private static string? ExtrairPoster(JsonElement item) =>
             item.TryGetProperty("poster_path", out var pp) && pp.GetString() is { } path
