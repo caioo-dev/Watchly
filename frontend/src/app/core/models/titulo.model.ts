@@ -9,6 +9,7 @@ export interface TituloExternoResponse {
   nome: string;
   ano?: number;
   imagemUrl?: string;
+  poularidade?: number;
 }
 
 export interface TituloDetalheResponse {
