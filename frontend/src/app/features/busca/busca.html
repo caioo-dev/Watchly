@@ -2,14 +2,16 @@
 
   <div class="flex gap-3">
     <input
-      [(ngModel)]="query"
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)"
       (keyup.enter)="buscar()"
       type="text"
       placeholder="Buscar filmes, séries, animes..."
       class="flex-1 bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-600"
     />
     <select
-      [(ngModel)]="tipoFiltro"
+      [ngModel]="tipoFiltro()"
+      (ngModelChange)="tipoFiltro.set($event)"
       class="bg-gray-800 text-white rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500"
     >
       <option value="">Todos</option>
@@ -23,7 +25,7 @@
     >
       Buscar
     </button>
-    @if (buscou) {
+    @if (buscou()) {
     <button
       (click)="limpar()"
       class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-3 rounded-lg transition-colors font-medium"
@@ -33,22 +35,22 @@
   }
   </div>
 
-  @if (carregando) {
+  @if (carregando()) {
     <div class="text-center text-gray-400 py-12">Buscando...</div>
   }
 
-  @if (erro) {
+  @if (erro()) {
     <div class="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-      <p class="text-red-400 text-sm">{{ erro }}</p>
+      <p class="text-red-400 text-sm">{{ erro() }}</p>
     </div>
   }
 
-  @if (!carregando && buscou && resultados.length === 0) {
+  @if (!carregando() && buscou() && resultados().length === 0) {
     <div class="text-center text-gray-400 py-12">Nenhum resultado encontrado.</div>
   }
 
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-    @for (titulo of resultados; track titulo.externalId) {
+    @for (titulo of resultados(); track titulo.externalId) {
      <a [routerLink]="['/titulo', titulo.fonte, titulo.tipo, titulo.externalId]" class="group cursor-pointer">
         <div class="bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all">
           @if (titulo.imagemUrl) {
@@ -67,18 +69,18 @@
     }
   </div>
 
-  @if (temMais || pagina > 1) {
+  @if (temMais() || pagina() > 1) {
     <div class="flex justify-center gap-4 mt-6">
       <button
         (click)="anterior()"
-        [disabled]="pagina === 1"
+        [disabled]="pagina() === 1"
         class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Anterior
       </button>
       <button
         (click)="proxima()"
-        [disabled]="!temMais"
+        [disabled]="!temMais()"
         class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Próxima
