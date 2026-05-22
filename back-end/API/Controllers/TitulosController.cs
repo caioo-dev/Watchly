@@ -1,6 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Watchly.Application.Titulos;
 using Watchly.Domain.Enum;
 
@@ -19,18 +17,18 @@ namespace Watchly.API.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 60)]
-        public async Task<IActionResult> Buscar(
-            [FromQuery] string query,
+        public async Task<ActionResult<TituloExternoResponse>> Buscar(
+            [FromQuery] string busca,
             [FromQuery] TipoTitulo? tipo,
             [FromQuery] int page = 1,
             CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(query))
-                return BadRequest("O parâmetro 'query' é obrigatório.");
+            if (string.IsNullOrWhiteSpace(busca))
+                return BadRequest("O parâmetro 'busca' é obrigatório.");
 
             try
             {
-                var result = await _service.BuscarAsync(query, tipo, page, ct);
+                IReadOnlyList<TituloExternoResponse> result = await _service.BuscarAsync(busca, tipo, page, ct);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -49,7 +47,7 @@ namespace Watchly.API.Controllers
             [FromRoute] TipoTitulo tipo,
             CancellationToken ct)
         {
-            var result = await _service.BuscarDetalheAsync(fonte, tipo, externalId, ct);
+            TituloDetalheResponse result = await _service.BuscarDetalheAsync(fonte, tipo, externalId, ct);
             return Ok(result);
         }
     }

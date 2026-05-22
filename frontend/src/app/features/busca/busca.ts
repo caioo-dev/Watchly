@@ -13,9 +13,8 @@ import { TituloExternoResponse, TipoTitulo } from '../../core/models/titulo.mode
 export class BuscaComponent implements OnInit {
   private readonly tituloService = inject(TituloService);
   private readonly cdr           = inject(ChangeDetectorRef);
-  private readonly router        = inject(Router);
 
-  query      = '';
+  busca      = '';
   tipoFiltro: TipoTitulo | '' = '';
   resultados: TituloExternoResponse[] = [];
   carregando = false;
@@ -34,7 +33,7 @@ export class BuscaComponent implements OnInit {
   }
 
   limpar(): void {
-    this.query      = '';
+    this.busca      = '';
     this.tipoFiltro = '';
     this.resultados = [];
     this.buscou     = false;
@@ -46,14 +45,14 @@ export class BuscaComponent implements OnInit {
   }
 
   buscar(pagina = 1): void {
-    if (!this.query.trim()) return;
+    if (!this.busca.trim()) return;
 
     this.carregando = true;
     this.erro       = '';
     this.buscou     = true;
     this.pagina     = pagina;
 
-    this.tituloService.buscar(this.query, this.tipoFiltro || undefined, pagina).subscribe({
+    this.tituloService.buscar(this.busca, this.tipoFiltro || undefined, pagina).subscribe({
       next: (data) => this.onBuscaSuccess(data),
       error: ()     => this.onBuscaError()
     });
@@ -72,11 +71,11 @@ export class BuscaComponent implements OnInit {
   // ──────────────────────────────────────────────
 
   private restaurarEstado(): void {
-    const { query, tipoFiltro, resultados, pagina, buscou } = this.tituloService.estadoBusca;
+    const { busca, tipoFiltro, resultados, pagina, buscou } = this.tituloService.estadoBusca;
 
     if (!buscou) return;
 
-    this.query      = query;
+    this.busca      = busca;
     this.tipoFiltro = tipoFiltro;
     this.resultados = resultados;
     this.pagina     = pagina;

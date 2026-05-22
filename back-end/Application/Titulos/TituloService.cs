@@ -1,7 +1,5 @@
-﻿using System.Text.Json;
-using Watchly.Domain.Enum;
+﻿using Watchly.Domain.Enum;
 using Watchly.Infrastructure.ExternalApis;
-using static System.Net.WebRequestMethods;
 
 namespace Watchly.Application.Titulos
 {
@@ -15,15 +13,15 @@ namespace Watchly.Application.Titulos
         }
 
         public async Task<IReadOnlyList<TituloExternoResponse>> BuscarAsync(
-            string query, TipoTitulo? tipo, int page, CancellationToken ct)
+            string busca, TipoTitulo? tipo, int page, CancellationToken ct)
         {
-            return await _tmdb.SearchAsync(query, tipo, page, ct);
+            return await _tmdb.SearchAsync(busca, tipo, page, ct);
         }
 
         public async Task<TituloDetalheResponse> BuscarDetalheAsync(
             FonteTitulo fonte, TipoTitulo tipo, string externalId, CancellationToken ct)
         {
-            var detalhe = await _tmdb.GetDetalheAsync(externalId, tipo, ct);
+            TituloDetalheResponse? detalhe = await _tmdb.GetDetalheAsync(externalId, tipo, ct);
             return detalhe ?? throw new KeyNotFoundException("Título não encontrado na fonte externa.");
         }
     }

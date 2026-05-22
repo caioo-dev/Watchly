@@ -2,9 +2,9 @@ using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 using Watchly.API.Middlewares;
-using Watchly.Application;
 using Watchly.Application.Auth;
 using Watchly.Application.Titulos;
 using Watchly.Application.UsuarioTitulo;
@@ -50,11 +50,11 @@ namespace Watchly
                     };
                 });
 
-                builder.Services.AddHttpClient<TmdbClient>((sp, client) =>
-                {
-                    var key = builder.Configuration["Tmdb:ApiKey"];
-                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {key}");
-                });
+            builder.Services.AddHttpClient<TmdbClient>((sp, client) =>
+            {
+                var key = builder.Configuration["Tmdb:ApiKey"];
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {key}");
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -84,7 +84,19 @@ namespace Watchly
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Minha API", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Insira apenas o seu token JWT abaixo. Exemplo: eyJhbG..."
+                });
+            });
 
             var app = builder.Build();
 
@@ -105,6 +117,7 @@ namespace Watchly
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

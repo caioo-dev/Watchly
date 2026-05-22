@@ -10,7 +10,7 @@
 
       @if (authService.isAuthenticated()) {
         <a routerLink="/minha-lista" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Minha Lista</a>
-        <a routerLink="/perfil" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Perfil</a>
+        <!-- <a routerLink="/perfil" routerLinkActive="text-white" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Perfil</a> -->
         <button (click)="authService.logout()" class="text-gray-400 hover:text-red-400 px-3 py-2 rounded-lg transition-colors text-sm font-medium">Sair</button>
       } @else {
         <a routerLink="/login" class="text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium">Entrar</a>

@@ -16,9 +16,9 @@ namespace Watchly.Infrastructure.ExternalApis
         public TmdbClient(HttpClient http) => _http = http;
 
         public async Task<IReadOnlyList<TituloExternoResponse>> SearchAsync(
-            string query, TipoTitulo? tipo, int page, CancellationToken ct)
+            string busca, TipoTitulo? tipo, int page, CancellationToken ct)
         {
-            var resultados = await BuscarResultadosAsync(query, tipo, page, ct);
+            List<TituloExternoResponse> resultados = await BuscarResultadosAsync(busca, tipo, page, ct);
             return FiltrarPorTipo(resultados, tipo)
                 .OrderByDescending(t => t.Popularidade)
                 .ToList()
@@ -28,9 +28,9 @@ namespace Watchly.Infrastructure.ExternalApis
         public async Task<TituloDetalheResponse?> GetDetalheAsync(
             string externalId, TipoTitulo tipo, CancellationToken ct)
         {
-            var endpoint = ResolverEndpointDetalhe(tipo);
-            var url = $"{BaseUrl}/{endpoint}/{externalId}?language=pt-BR";
-            var response = await _http.GetAsync(url, ct);
+            string? endpoint = ResolverEndpointDetalhe(tipo);
+            string? url = $"{BaseUrl}/{endpoint}/{externalId}?language=pt-BR";
+            HttpResponseMessage response = await _http.GetAsync(url, ct);
 
             if (!response.IsSuccessStatusCode) return null;
 
@@ -41,33 +41,35 @@ namespace Watchly.Infrastructure.ExternalApis
         }
 
         private async Task<List<TituloExternoResponse>> BuscarResultadosAsync(
-            string query, TipoTitulo? tipo, int page, CancellationToken ct)
+            string busca, TipoTitulo? tipo, int page, CancellationToken ct)
         {
-            var resultados = new List<TituloExternoResponse>();
+            List<TituloExternoResponse>? resultados = [];
 
             if (DeveABuscarFilmes(tipo))
-                resultados.AddRange(await BuscarPorEndpointAsync(query, "movie", TipoTitulo.Filme, page, ct));
+                resultados.AddRange(await BuscarPorEndpointAsync(busca, "movie", TipoTitulo.Filme, page, ct));
 
             if (DeveBuscarSeries(tipo))
-                resultados.AddRange(await BuscarPorEndpointAsync(query, "tv", TipoTitulo.Serie, page, ct));
+                resultados.AddRange(await BuscarPorEndpointAsync(busca, "tv", TipoTitulo.Serie, page, ct));
 
             return resultados;
         }
 
         private async Task<IReadOnlyList<TituloExternoResponse>> BuscarPorEndpointAsync(
-            string query, string endpoint, TipoTitulo tipoBase, int page, CancellationToken ct)
+            string busca, string endpoint, TipoTitulo tipoBase, int page, CancellationToken ct)
         {
-            var url = $"{BaseUrl}/search/{endpoint}?query={Uri.EscapeDataString(query)}&language=pt-BR&page={page}";
-            var response = await _http.GetAsync(url, ct);
+            string? url = $"{BaseUrl}/search/{endpoint}?query={Uri.EscapeDataString(busca)}&language=pt-BR&page={page}";
+            HttpResponseMessage? response = await _http.GetAsync(url, ct);
 
             if (!response.IsSuccessStatusCode) return [];
 
-            using var stream = await response.Content.ReadAsStreamAsync(ct);
-            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
+            using Stream? stream = await response.Content.ReadAsStreamAsync(ct);
+            using JsonDocument? doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
 
             return doc.RootElement
                 .GetProperty("results")
                 .EnumerateArray()
+                .Where(item => item.TryGetProperty("poster_path", out var pp) 
+                                                            && !string.IsNullOrWhiteSpace(pp.GetString()))
                 .Select(item => ParsearItem(item, tipoBase))
                 .ToList();
         }
@@ -108,9 +110,8 @@ namespace Watchly.Infrastructure.ExternalApis
             var ano = ExtrairAno(item);
             var poster = ExtrairPoster(item);
             var sinopse = ExtrairSinopse(item);
-            var popul = ExtrairPopularidade(item);
 
-            return new TituloDetalheResponse(externalId, FonteTitulo.TMDB, tipo, nome, ano, poster, sinopse, popul);
+            return new TituloDetalheResponse(externalId, FonteTitulo.TMDB, tipo, nome, ano, poster, sinopse);
         }
 
 
@@ -142,7 +143,7 @@ namespace Watchly.Infrastructure.ExternalApis
 
         private static int? ExtrairAno(JsonElement item)
         {
-            var data = item.TryGetProperty("release_date", out var rd) ? rd.GetString()
+            string? data = item.TryGetProperty("release_date", out var rd) ? rd.GetString()
                      : item.TryGetProperty("first_air_date", out var fd) ? fd.GetString()
                      : null;
 
@@ -155,7 +156,7 @@ namespace Watchly.Infrastructure.ExternalApis
         private static string? ExtrairPoster(JsonElement item) =>
             item.TryGetProperty("poster_path", out var pp) && pp.GetString() is { } path
                 ? $"{ImageUrl}{path}"
-                : null;
+                : null;  
 
         private static List<int> ExtrairGeneros(JsonElement item) =>
             item.TryGetProperty("genre_ids", out var g)

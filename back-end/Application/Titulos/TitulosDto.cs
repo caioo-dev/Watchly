@@ -18,7 +18,6 @@ namespace Watchly.Application.Titulos
         string Nome,
         int? Ano,
         string? ImagemUrl,
-        string? Sinopse,
-        double? Popularidade
+        string? Sinopse
     );
 }
