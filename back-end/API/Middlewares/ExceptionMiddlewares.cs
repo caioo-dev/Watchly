@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Text.Json;
 
@@ -28,9 +29,9 @@ namespace Watchly.API.Middlewares
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var (statusCode, message) = exception switch
+            (HttpStatusCode statusCode, string? message) = exception switch
             {
                 UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
                 KeyNotFoundException => (HttpStatusCode.NotFound, exception.Message),
@@ -39,16 +40,15 @@ namespace Watchly.API.Middlewares
                 _ => (HttpStatusCode.InternalServerError, "Ocorreu um erro interno.")
             };
 
-            var payload = JsonSerializer.Serialize(new
-            {
-                status = (int)statusCode,
-                message
-            });
-
-            context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
+            context.Response.ContentType = "application/problem+json";
 
-            return context.Response.WriteAsync(payload);
+            await context.Response.WriteAsJsonAsync(new ProblemDetails
+            {
+                Type = exception.GetType().Name,
+                Title = "Ocorreu um erro",
+                Detail = message
+            });
         }
     }
 }

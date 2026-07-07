@@ -1,8 +1,12 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+
 import { TituloService } from '../../core/services/titulo.service';
-import { TituloExternoResponse, TipoTitulo } from '../../core/models/titulo.model';
+import {
+  TipoTitulo,
+  TituloExternoResponse
+} from '../../core/models/titulo.model';
 
 @Component({
   selector: 'app-busca',
@@ -12,27 +16,58 @@ import { TituloExternoResponse, TipoTitulo } from '../../core/models/titulo.mode
 })
 export class BuscaComponent implements OnInit {
   private readonly tituloService = inject(TituloService);
-  private readonly router        = inject(Router);
-  // state com signals
-  query      = signal('');
-  tipoFiltro = signal<TipoTitulo | ''>('');
-  resultados = signal<TituloExternoResponse[]>([]);
-  carregando = signal(false);
-  erro       = signal('');
-  buscou     = signal(false);
-  pagina     = signal(1);
-  temMais    = signal(true);
-  temMais    = true;
+
+  readonly query = signal('');
+  readonly tipoFiltro = signal<TipoTitulo | ''>('');
+  readonly resultados = signal<TituloExternoResponse[]>([]);
+  readonly carregando = signal(false);
+  readonly erro = signal('');
+  readonly buscou = signal(false);
+  readonly pagina = signal(1);
+  readonly temMais = signal(true);
 
   ngOnInit(): void {
     if (this.tituloService.voltandoDaBusca) {
       this.tituloService.voltandoDaBusca = false;
       this.restaurarEstado();
-    } else {
-      this.tituloService.limparEstado();
+      return;
     }
+
+    this.tituloService.limparEstado();
   }
 
+  buscar(pagina = 1): void {
+    if (!this.query().trim()) {
+      return;
+    }
+
+    this.carregando.set(true);
+    this.erro.set('');
+    this.buscou.set(true);
+    this.pagina.set(pagina);
+
+    this.tituloService
+      .buscar(
+        this.query(),
+        this.tipoFiltro() || undefined,
+        pagina
+      )
+      .subscribe({
+        next: (resultado) => {
+          this.resultados.set(resultado);
+          this.temMais.set(resultado.length > 0);
+          this.carregando.set(false);
+
+          this.salvarEstado();
+        },
+        error: () => {
+          this.erro.set('Erro ao buscar títulos.');
+          this.carregando.set(false);
+        }
+      });
+  }
+
+  limpar(): void {
     this.query.set('');
     this.tipoFiltro.set('');
     this.resultados.set([]);
@@ -41,55 +76,34 @@ export class BuscaComponent implements OnInit {
     this.temMais.set(true);
     this.erro.set('');
 
-    this.erro       = '';
     this.tituloService.limparEstado();
   }
 
-    if (!this.query().trim()) return;
-    if (!this.query.trim()) return;
-
-    this.carregando.set(true);
-    this.erro.set('');
-    this.buscou.set(true);
-    this.pagina.set(pagina);
-
-    this.tituloService
-      .buscar(this.query(), this.tipoFiltro() || undefined, pagina)
-      .subscribe({
-        next: (data) => {
-          this.resultados.set(data);
-          this.temMais.set(data.length > 0);
-          this.carregando.set(false);
-          this.salvarEstado();
-        },
-        error: () => {
-          this.erro.set('Erro ao buscar títulos.');
-          this.carregando.set(false);
-        }
-      });
-    });
-  }
-
   anterior(): void {
-    if (this.pagina() > 1) this.buscar(this.pagina() - 1);
+    if (this.pagina() > 1) {
+      this.buscar(this.pagina() - 1);
+    }
   }
 
   proxima(): void {
-    if (this.temMais()) this.buscar(this.pagina() + 1);
+    if (this.temMais()) {
+      this.buscar(this.pagina() + 1);
+    }
   }
 
-  // helpers
-
+  private restaurarEstado(): void {
     const estado = this.tituloService.estadoBusca;
-    if (!buscou) return;
-    if (!estado.buscou) return;
-  }
+
+    if (!estado.buscou) {
+      return;
+    }
 
     this.query.set(estado.query);
     this.tipoFiltro.set(estado.tipoFiltro);
     this.resultados.set(estado.resultados);
     this.pagina.set(estado.pagina);
     this.buscou.set(estado.buscou);
+    this.temMais.set(estado.resultados.length > 0);
   }
 
   private salvarEstado(): void {

@@ -20,5 +20,4 @@ export interface TituloDetalheResponse {
   ano?: number;
   imagemUrl?: string;
   sinopse?: string;
-  popularidade?: number;
 }

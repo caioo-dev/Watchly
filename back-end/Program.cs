@@ -22,7 +22,6 @@ namespace Watchly
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUsuarioTitulo, UsuarioTituloService>();
             builder.Services.AddScoped<ITitulosService, TituloService>();
@@ -33,22 +32,35 @@ namespace Watchly
                     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
                 });
 
+
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                                                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
-                    };
-                });
+                        if (context.Request.Cookies.TryGetValue("watchly_token", out var token))
+                        {
+                            context.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
             builder.Services.AddHttpClient<TmdbClient>((sp, client) =>
             {
@@ -62,7 +74,8 @@ namespace Watchly
                 {
                     policy.WithOrigins("http://localhost:4200")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials();
                 });
             });
 
@@ -110,8 +123,6 @@ namespace Watchly
             app.UseCors(policyName: "Dev");
 
             app.UseResponseCompression();
-
-            app.UseHttpCacheHeaders();
 
             app.UseMiddleware<ExceptionMiddleware>();
 

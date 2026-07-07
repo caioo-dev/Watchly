@@ -6,7 +6,7 @@ import { TituloDetalheResponse, TituloExternoResponse, TipoTitulo, FonteTitulo }
 import { environment } from '../../../environments/environment';
 
 export interface EstadoBusca {
-  busca: string;
+  query: string;
   tipoFiltro: TipoTitulo | '';
   resultados: TituloExternoResponse[];
   pagina: number;
@@ -14,7 +14,7 @@ export interface EstadoBusca {
 }
 
 const ESTADO_INICIAL: EstadoBusca = {
-  busca:      '',
+  query:      '',
   tipoFiltro: '',
   resultados: [],
   pagina:     1,
@@ -55,11 +55,11 @@ export class TituloService {
   }
 
   private salvarEstado(
-    busca: string, tipo: TipoTitulo | undefined,
+    query: string, tipo: TipoTitulo | undefined,
     resultados: TituloExternoResponse[], pagina: number): void
   {
     this.estadoBusca = {
-      busca,
+      query,
       tipoFiltro: tipo ?? '',
       resultados,
       pagina,

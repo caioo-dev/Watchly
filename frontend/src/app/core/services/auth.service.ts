@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of } from 'rxjs';
 import { AuthResponse, LoginRequest, MeResponse, RegisterRequest, UpdateProfileRequest } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
@@ -9,50 +9,43 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly tokenKey = 'watchly_token';
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, request).pipe(
-      tap(response => this.salvarToken(response.token))
-    );
+  private readonly _usuario = signal<MeResponse | null>(null);
+  readonly usuario = this._usuario.asReadonly();
+
+  register(request: RegisterRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/register`, request);
   }
 
-  login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, request).pipe(
-      tap(response => this.salvarToken(response.token))
-    );
+  login(request: LoginRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/login`, request);
   }
 
   getMe(): Observable<MeResponse> {
-    return this.http.get<MeResponse>(`${environment.apiUrl}/auth/me`);
+    return this.http.get<MeResponse>(`${environment.apiUrl}/auth/me`).pipe(
+      tap(response => this._usuario.set(response))
+    );
   }
 
   updateProfile(request: UpdateProfileRequest): Observable<MeResponse> {
-    return this.http.put<MeResponse>(`${environment.apiUrl}/auth/me`, request);
+    return this.http.put<MeResponse>(`${environment.apiUrl}/auth/me`, request).pipe(
+      tap(response => this._usuario.set(response))
+    );
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.router.navigate(['/login']);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    this.http.post<void>(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+      next: () => this.finalizarLogout(),
+      error: () => this.finalizarLogout() // cookie pode já ter expirado; desloga localmente de qualquer forma
+    });
   }
 
   isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 > Date.now();
-    } catch {
-      return false;
-    }
+    return this._usuario() !== null;
   }
 
-  private salvarToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
+  private finalizarLogout(): void {
+    this._usuario.set(null);
+    this.router.navigate(['/login']);
   }
 }

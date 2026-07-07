@@ -22,8 +22,8 @@ namespace Watchly.API.Controllers
             [FromBody] RegisterRequest request,
             CancellationToken ct)
         {
-            var result = await _service.RegisterAsync(request, ct);
-            return Created(string.Empty, result);
+            await _service.RegisterAsync(request, ct);
+            return Created();
         }
 
         [HttpPost("login")]
@@ -33,8 +33,17 @@ namespace Watchly.API.Controllers
             [FromBody] LoginRequest request,
             CancellationToken ct)
         {
-            var result = await _service.LoginAsync(request, ct);
-            return Ok(result);
+            await _service.LoginAsync(request, ct);
+            return Ok();
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public IActionResult Logout()
+        {
+            _service.Logout();
+            return NoContent();
         }
 
         [HttpGet("me")]
