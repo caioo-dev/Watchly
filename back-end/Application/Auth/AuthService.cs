@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,20 +8,13 @@ using Watchly.Infrastructure;
 
 namespace Watchly.Application.Auth
 {
-    public sealed class AuthService : IAuthService
+    public sealed class AuthService(AppDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor) : IAuthService
     {
-        private readonly AppDbContext _db;
-        private readonly IConfiguration _config;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly AppDbContext _db = db;
+        private readonly IConfiguration _config = config;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         private const string CookieName = "watchly_token";
-
-        public AuthService(AppDbContext db, IConfiguration config, IHttpContextAccessor httpContextAccessor)
-        {
-            _db = db;
-            _config = config;
-            _httpContextAccessor = httpContextAccessor;
-        }
 
         public async Task RegisterAsync(RegisterRequest request, CancellationToken ct)
         {
@@ -62,7 +53,7 @@ namespace Watchly.Application.Auth
             _httpContextAccessor.HttpContext?.Response.Cookies.Delete(CookieName, new CookieOptions
             {
                 Path = "/",
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Secure = true,
                 HttpOnly = true
             });
@@ -77,7 +68,7 @@ namespace Watchly.Application.Auth
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddHours(8),
                 Path = "/"
             });

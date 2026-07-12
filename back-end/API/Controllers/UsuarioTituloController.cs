@@ -9,14 +9,9 @@ namespace Watchly.API.Controllers
     [ApiController]
     [Authorize]
     [Route("minha-lista")]
-    public sealed class UsuarioTituloController : ControllerBase
+    public sealed class UsuarioTituloController(IUsuarioTitulo service) : ControllerBase
     {
-        private readonly IUsuarioTitulo _service;
-
-        public UsuarioTituloController(IUsuarioTitulo service)
-        {
-            _service = service;
-        }
+        private readonly IUsuarioTitulo _service = service;
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
